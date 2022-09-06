@@ -1581,7 +1581,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 for i, dti in enumerate(dts):
                     if dti is not None:
                         di = datas[i]
-                        rpi = False and di.replaying   # to check behavior
+                        rpi = di.replaying   # to check behavior
                         if dti > dt0:
                             if not rpi:  # must see all ticks ...
                                 di.rewind()  # cannot deliver yet

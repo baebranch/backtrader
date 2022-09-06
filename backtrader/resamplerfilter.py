@@ -652,7 +652,7 @@ class Replayer(_BaseResampler):
                 if adjusted:
                     ago = 0 if (consumed or fromcheck) else -1
                     # Update to the point right before the new data
-                    data._updatebar(self.bar.lvalues(), forward=False, ago=ago)
+                    data._updatebar(self.bar.lvalues(), forward=False, ago=ago) # Rolls to new bar
 
                 if not fromcheck:
                     if not consumed:
@@ -692,7 +692,7 @@ class Replayer(_BaseResampler):
                 self.bar.bupdate(data)
 
             if not self._firstbar:  # only discard data if not firstbar
-                data.backwards(force=True)
+                data.backwards(force=True) # Rolls back bar
 
             data._updatebar(self.bar.lvalues(), forward=False, ago=0)
             self._firstbar = False

@@ -752,6 +752,33 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                     axbot, axtop = ax.get_ylim()
                     axbot *= (1.0 - self.pinf.sch.volpushup)
                     ax.set_ylim(axbot, axtop)
+        
+        # Adjust for any indicators that might be outside of current chart limits
+        max_ind = max(
+            [max(
+                [max(
+                    filter(lambda val: not math.isnan(val), l.array),
+                    default = 0
+                ) for l in ind.lines],
+                default = 0
+            ) for ind in indicators],
+            default = 0
+        )*1.001
+        min_ind = min(
+            [min(
+                [min(
+                    filter(lambda val: not math.isnan(val), l.array),
+                    default = math.inf
+                ) for l in ind.lines],
+                default = math.inf
+            ) for ind in indicators],
+            default = math.inf
+        )*0.999
+        axbot, axtop = ax.get_ylim()
+        print(max_ind, axtop, "   ", min_ind, axbot)
+        axbot = axbot if axbot < min_ind else min_ind
+        axtop = axtop if axtop > max_ind else max_ind
+        ax.set_ylim(axbot, axtop)
 
         for ind in indicators:
             self.plotind(data, ind, subinds=self.dplotsover[ind], masterax=ax)
