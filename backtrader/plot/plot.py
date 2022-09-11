@@ -775,7 +775,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             default = math.inf
         )*0.999
         axbot, axtop = ax.get_ylim()
-        print(max_ind, axtop, "   ", min_ind, axbot)
         axbot = axbot if axbot < min_ind else min_ind
         axtop = axtop if axtop > max_ind else max_ind
         ax.set_ylim(axbot, axtop)
