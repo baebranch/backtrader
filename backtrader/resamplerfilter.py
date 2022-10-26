@@ -648,7 +648,7 @@ class Replayer(_BaseResampler):
                 cond = self._checkbarover(data, fromcheck=fromcheck)
         if cond:
             if not onedge and self.doadjusttime:  # insert tick with adjtime
-                adjusted = self._adjusttime(greater=True)
+                adjusted = self._adjusttime(greater=self.params.rightedge)
                 if adjusted:
                     ago = 0 if (consumed or fromcheck) else -1
                     # Update to the point right before the new data
@@ -660,7 +660,7 @@ class Replayer(_BaseResampler):
                         self.bar.bupdate(data, reopen=True)
                         # erase is True, but the tick will not be seen below
                         # and therefore no need to mark as 1st
-                        data._save2stack(erase=True, force=True)
+                        data._save2stack(erase=True, force=True) # Rolls back last bar on lines
                     else:
                         self.bar.bstart(maxdate=True)
                         self._firstbar = True  # next is first
