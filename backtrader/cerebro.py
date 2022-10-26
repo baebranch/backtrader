@@ -983,7 +983,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         # pfillers2 = {self.datas[i]: self._plotfillers2[i]
         # for i, x in enumerate(self._plotfillers2)}
 
-        figs = []
+        self.figs = []
         for stratlist in self.runstrats:
             for si, strat in enumerate(stratlist):
                 rfig = plotter.plot(strat, figid=si * 100,
@@ -991,12 +991,20 @@ class Cerebro(with_metaclass(MetaParams, object)):
                                     start=start, end=end, use=use)
                 # pfillers=pfillers2)
 
-                figs.append(rfig)
+                self.figs.append(rfig)
 
-            plotter.show()
+            # plotter.show()
 
-        return figs
-
+        return self.figs, plotter
+    
+    def show(self):
+        """ Shows the figures by calling them instead of the global pyplot.show()
+            Allows multiple figures to be stored in the same pickle file
+        """
+        for plots in self.figs:
+            for fig in plots:
+                fig.show()
+    
     def __call__(self, iterstrat):
         '''
         Used during optimization to pass the cerebro over the multiprocesing
