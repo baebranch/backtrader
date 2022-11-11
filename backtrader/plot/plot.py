@@ -68,8 +68,8 @@ class PInfo(object):
 
         self.prop = mfontmgr.FontProperties(size=self.sch.subtxtsize)
 
-    def newfig(self, figid, numfig, mpyplot):
-        fig = mpyplot.figure(figid + numfig)
+    def newfig(self, figid, numfig, mpyplot, prefix='Figure'):
+        fig = mpyplot.figure(prefix + str(figid + numfig))
         self.figs.append(fig)
         self.daxis = collections.OrderedDict()
         self.vaxis = list()
@@ -114,7 +114,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                       **kwargs)
 
     def plot(self, strategy, figid=0, numfigs=1, iplot=True,
-             start=None, end=None, **kwargs):
+             start=None, end=None, prefix='Figure', **kwargs):
         # pfillers={}):
         if not strategy.datas:
             return
@@ -164,7 +164,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
         for numfig in range(numfigs):
             # prepare a figure
-            fig = self.pinf.newfig(figid, numfig, self.mpyplot)
+            fig = self.pinf.newfig(figid, numfig, self.mpyplot, prefix)
             figs.append(fig)
 
             self.pinf.pstart, self.pinf.pend, self.pinf.psize = pranges[numfig]

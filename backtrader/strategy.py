@@ -325,8 +325,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             return clk_len
 
         newdlens = [len(d) for d in self.datas]
-        if any(nl > l for l, nl in zip(self._dlens, newdlens)):
+        if len(self.lines.datetime) < max(newdlens):
             self.forward()
+            self.lines.datetime[-1] = self.datas[newdlens.index(max(newdlens))].datetime[-1]
 
         self.lines.datetime[0] = max(d.datetime[0]
                                      for d in self.datas if len(d))
