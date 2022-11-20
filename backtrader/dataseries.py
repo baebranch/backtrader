@@ -105,7 +105,7 @@ class DataSeries(LineSeries):
 
 
 class OHLC(DataSeries):
-    lines = ('close', 'low', 'high', 'open', 'volume', 'openinterest',)
+    lines = ('close', 'low', 'high', 'open', 'volume', 'spread', 'openinterest',)
 
 
 class OHLCDateTime(OHLC):
@@ -172,6 +172,7 @@ class _Bar(AutoOrderedDict):
         self.high = float('-inf')
         self.open = float('NaN')
         self.volume = 0.0
+        self.spread = 0.0
         self.openinterest = 0.0
         self.datetime = self.MAXDATE if maxdate else None
 
@@ -202,6 +203,7 @@ class _Bar(AutoOrderedDict):
 
         self.volume += data.volume[0]
         self.openinterest = data.openinterest[0]
+        self.spread = data.spread[0]
 
         o = self.open
         if reopen or not o == o:
