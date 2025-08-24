@@ -21,9 +21,10 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from collections import OrderedDict
-import itertools
 import sys
+import inspect
+import itertools
+from collections import OrderedDict
 
 import backtrader as bt
 from .utils.py3 import zip, string_types, with_metaclass
@@ -43,6 +44,8 @@ def findowner(owned, cls, startlevel=2, skip=None):
     # skip this frame and the caller's -> start at 2
     for framelevel in itertools.count(startlevel):
         try:
+            frame_len = inspect.stack()
+            if len(frame_len) <= framelevel: break
             frame = sys._getframe(framelevel)
         except ValueError:
             # Frame depth exceeded ... no owner ... break away

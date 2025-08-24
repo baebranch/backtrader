@@ -231,7 +231,10 @@ class Lines(object):
     def __getitem__(self, line):
         '''
         Proxy line operation
+        Raising StopIteration instead of allowing the inevitable IndexError to be raised
+        hides this error from the debugger, better debugger process
         '''
+        if len(self.lines) <= line: raise StopIteration 
         return self.lines[line]
 
     def get(self, ago=0, size=1, line=0):
