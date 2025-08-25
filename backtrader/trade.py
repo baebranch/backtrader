@@ -209,6 +209,7 @@ class Trade(object):
         '''Returns a datetime.datetime object with the datetime in which
         the trade was opened
         '''
+        if self.dtopen == 0.0: return None
         return self.data.num2date(self.dtopen, tz=tz, naive=naive)
 
     def close_datetime(self, tz=None, naive=True):

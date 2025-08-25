@@ -321,6 +321,8 @@ class ItemCollection(object):
             self._names.append(name)
 
     def __getitem__(self, key):
+        # Check if the key is within the valid range, to raise StopIteration that will be ignored by debugger
+        if len(self._items) <= key: raise StopIteration
         return self._items[key]
 
     def getnames(self):

@@ -269,7 +269,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
 
     def __getattr__(self, name):
         # Return attr from params if not found in order
-        return getattr(self.params, name)
+        return getattr(self.params, name) #@IgnoreException
 
     def __setattribute__(self, name, value):
         if hasattr(self.params, name):
