@@ -281,11 +281,7 @@ class BackBroker(bt.BrokerBase):
         self._cash_addition = collections.deque()
 
     def get_notification(self):
-        try:
-            return self.notifs.popleft()
-        except IndexError:
-            pass
-
+        if len(self.notifs) > 0: return self.notifs.popleft() # ErrorFix
         return None
 
     def set_fundmode(self, fundmode, fundstartval=None):

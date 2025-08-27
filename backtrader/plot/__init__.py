@@ -32,7 +32,7 @@ except ImportError:
 else:
     touse = 'TKAgg' if sys.platform != 'darwin' else 'MacOSX'
     try:
-        matplotlib.use(touse)
+        matplotlib.use(touse) #@IgnoreException
     except:
         # if another backend has already been loaded, an exception will be
         # generated and this can be skipped
