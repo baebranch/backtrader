@@ -461,7 +461,7 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
         # to refer to line by name directly if the attribute was not found
         # in this object if we set an attribute in this object it will be
         # found before we end up here
-        return getattr(self.lines, name)
+        return getattr(self.lines, name) #@IgnoreException
 
     def __len__(self):
         return len(self.lines)

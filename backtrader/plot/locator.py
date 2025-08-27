@@ -223,8 +223,11 @@ class AutoDateLocator(ADLocator):
 
         locator.set_axis(self.axis)
 
-        locator.set_view_interval(*self.axis.get_view_interval())
-        locator.set_data_interval(*self.axis.get_data_interval())
+        # Errors probably due to updates in matplotlib library
+        # locator.set_view_interval(*self.axis.get_view_interval())
+        # locator.set_data_interval(*self.axis.get_data_interval())
+        self.axis.set_view_interval(*self.axis.get_view_interval()) # ErrorFix
+        # self.axis.set_data_interval(*self.axis.get_data_interval()) # ErrorFix
         return locator
 
 
