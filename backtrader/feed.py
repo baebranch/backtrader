@@ -245,7 +245,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
 
     def date2num(self, dt):
         if self._tz is not None:
-            return date2num(self._tz.localize(dt))
+            return date2num(dt)
+            # return date2num(self._tz.localize(dt))
 
         return date2num(dt)
 

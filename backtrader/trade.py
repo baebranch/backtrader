@@ -281,6 +281,7 @@ class Trade(object):
             self.isopen = False
             self.barclose = len(self.data)
             self.dtclose = self.data.datetime[0]
+            self.close_price = price # price at which the trade was closed
 
             self.status = self.Closed
         elif self.isopen:
