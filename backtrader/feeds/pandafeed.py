@@ -154,10 +154,11 @@ class PandasData(feed.DataBase):
         ('close', -1),
         ('volume', -1),
         ('openinterest', -1),
+        ('spread', -1),
     )
 
     datafields = [
-        'datetime', 'open', 'high', 'low', 'close', 'volume', 'openinterest'
+        'datetime', 'open', 'high', 'low', 'close', 'volume', 'openinterest', 'spread'
     ]
 
     def __init__(self):
