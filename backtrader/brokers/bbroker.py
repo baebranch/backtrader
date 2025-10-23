@@ -1225,9 +1225,10 @@ class BackBroker(bt.BrokerBase):
                                                  data.close[0])
                 # record the last adjustment price
                 pos.adjbase = data.close[0]
+                pos.pnl = comminfo.profitandloss(pos.size, pos.price, pos.adjbase)
 
         self._get_value()  # update value
-
+  
 
 # Alias
 BrokerBack = BackBroker

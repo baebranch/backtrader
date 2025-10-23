@@ -25,7 +25,7 @@ from __future__ import (absolute_import, division, print_function,
 from copy import copy
 
 
-class Position(object):
+class Position:
     '''
     Keeps and updates the size and price of a position. The object has no
     relationship to any asset. It only keeps size and price.
@@ -47,6 +47,7 @@ class Position(object):
         items.append('- Closed: {}'.format(self.upclosed))
         items.append('- Opened: {}'.format(self.upopened))
         items.append('- Adjbase: {}'.format(self.adjbase))
+        items.append('- Pnl: {}'.format(self.pnl))
         items.append('--- Position End')
         return '\n'.join(items)
 
@@ -58,6 +59,7 @@ class Position(object):
             self.price = 0.0
 
         self.adjbase = None
+        self.pnl = 0
 
         self.upopened = size
         self.upclosed = 0
