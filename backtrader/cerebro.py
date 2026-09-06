@@ -22,9 +22,10 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import datetime
-import collections
 import itertools
+import collections
 import multiprocessing
+from collections.abc import Iterable
 
 import backtrader as bt
 from .utils.py3 import (map, range, zip, with_metaclass, string_types,
@@ -330,7 +331,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         for elem in iterable:
             if isinstance(elem, string_types):
                 elem = (elem,)
-            elif not isinstance(elem, collections.Iterable):
+            elif not isinstance(elem, Iterable):
                 elem = (elem,)
 
             niterable.append(elem)

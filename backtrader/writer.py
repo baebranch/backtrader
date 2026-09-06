@@ -21,10 +21,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import collections
 import io
-import itertools
 import sys
+import itertools
+import collections
+from collections.abc import Iterable
 
 import backtrader as bt
 from backtrader.utils.py3 import (map, with_metaclass, string_types,
@@ -205,7 +206,7 @@ class WriterFile(WriterBase):
                     self.writelineseparator(level=level)
                 self.writeline(kline)
                 self.writedict(val, level=level + 1, recurse=True)
-            elif isinstance(val, (list, tuple, collections.Iterable)):
+            elif isinstance(val, (list, tuple, Iterable)):
                 line = ', '.join(map(str, val))
                 self.writeline(kline + ' ' + line)
             else:
