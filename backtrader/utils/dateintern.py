@@ -24,6 +24,7 @@ from __future__ import (absolute_import, division, print_function,
 import datetime
 import math
 import time as _time
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .py3 import string_types
 
@@ -46,41 +47,75 @@ TIME_MIN = datetime.time.min
 
 
 def tzparse(tz):
-    # If no object has been provided by the user and a timezone can be
-    # found via contractdtails, then try to get it from pytz, which may or
-    # may not be available.
-    tzstr = isinstance(tz, string_types)
-    if tz is None or not tzstr:
+    """Resolve a public timezone value without mutating the tzinfo object."""
+    if tz is None:
+        return None
+    if not isinstance(tz, string_types):
+        name = getattr(tz, 'key', None) or getattr(tz, 'zone', None)
+        if isinstance(name, string_types):
+            try:
+                return ZoneInfo('CST6CDT' if name == 'CST' else name)
+            except ZoneInfoNotFoundError:
+                pass
         return Localizer(tz)
 
+    name = 'CST6CDT' if tz == 'CST' else tz
     try:
-        import pytz  # keep the import very local
-    except ImportError:
-        return Localizer(tz)    # nothing can be done
-
-    tzs = tz
-    if tzs == 'CST':  # usual alias
-        tzs = 'CST6CDT'
-
-    try:
-        tz = pytz.timezone(tzs)
-    except pytz.UnknownTimeZoneError:
-        return Localizer(tz)    # nothing can be done
-
-    return tz
+        return ZoneInfo(name)
+    except ZoneInfoNotFoundError as exc:
+        raise ValueError('unknown timezone: {!r}'.format(tz)) from exc
 
 
 def Localizer(tz):
-    import types
+    """Retain the compatibility symbol while avoiding method injection."""
+    if tz is None or isinstance(tz, datetime.tzinfo):
+        return tz
+    raise TypeError('timezone must be a name or tzinfo instance')
 
-    def localize(self, dt):
-        return dt.replace(tzinfo=self)
 
-    if tz is not None and not hasattr(tz, 'localize'):
-        # patch the tz instance with a bound method
-        tz.localize = types.MethodType(localize, tz)
+def localize(dt, tz):
+    """Attach ``tz`` to a wall time under Rivver's explicit DST policy.
 
-    return tz
+    Ambiguous times select the later, standard-time occurrence (``fold=1``).
+    Nonexistent times are shifted forward by the transition gap. Aware inputs
+    preserve their instant and are converted with ``astimezone``.
+    """
+    tz = tzparse(tz)
+    if tz is None:
+        return dt
+    if not isinstance(dt, datetime.datetime):
+        raise TypeError('only datetime values can be localized')
+    if dt.tzinfo is not None:
+        return dt.astimezone(tz)
+
+    first = dt.replace(tzinfo=tz, fold=0)
+    second = dt.replace(tzinfo=tz, fold=1)
+    utc = datetime.timezone.utc
+    first_back = first.astimezone(utc).astimezone(tz)
+    second_back = second.astimezone(utc).astimezone(tz)
+    first_valid = first_back.replace(tzinfo=None) == dt and first_back.fold == 0
+    second_valid = second_back.replace(tzinfo=None) == dt and second_back.fold == 1
+
+    if first_valid and second_valid:
+        return second if first.utcoffset() != second.utcoffset() else first
+    if first_valid:
+        return first
+    if second_valid:
+        return second
+
+    gap = second.utcoffset() - first.utcoffset()
+    if gap <= ZERO:
+        raise ValueError('nonexistent local time: {!r}'.format(dt))
+    return localize(dt + gap, tz)
+
+
+def utc_naive(dt, tz=None):
+    """Normalize a datetime to the legacy naive-UTC engine representation."""
+    if tz is not None:
+        dt = localize(dt, tz)
+    if dt.tzinfo is None:
+        return dt
+    return dt.astimezone(datetime.timezone.utc).replace(tzinfo=None)
 
 
 # A UTC class, same as the one in the Python Docs
@@ -172,7 +207,8 @@ def num2date(x, tz=None, naive=True):
     if microsecond < 10:
         microsecond = 0  # compensate for rounding errors
 
-    if True and tz is not None:
+    if tz is not None:
+        tz = tzparse(tz)
         dt = datetime.datetime(
             dt.year, dt.month, dt.day, int(hour), int(minute), int(second),
             microsecond, tzinfo=UTC)
@@ -205,13 +241,7 @@ def date2num(dt, tz=None):
     preserving hours, minutes, seconds and microseconds.  Return value
     is a :func:`float`.
     """
-    if tz is not None:
-        dt = tz.localize(dt)
-
-    if hasattr(dt, 'tzinfo') and dt.tzinfo is not None:
-        delta = dt.tzinfo.utcoffset(dt)
-        if delta is not None:
-            dt -= delta
+    dt = utc_naive(dt, tz=tz)
 
     base = float(dt.toordinal())
     if hasattr(dt, 'hour'):

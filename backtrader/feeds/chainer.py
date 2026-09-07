@@ -81,7 +81,7 @@ class Chainer(bt.with_metaclass(MetaChainer, bt.DataBase)):
         timezone'''
         if self._args:
             return self._args[0]._gettz()
-        return bt.utils.date.Localizer(self.p.tz)
+        return bt.utils.date.tzparse(self.p.tz)
 
     def _load(self):
         while self._d is not None:

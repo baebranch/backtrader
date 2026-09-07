@@ -28,6 +28,21 @@ from backtrader.utils.py3 import with_metaclass
 from .. import metabase
 
 
+def _is_session_time(value, start, end):
+    if start <= end:
+        return start <= value <= end
+    return value >= start or value <= end
+
+
+def _session_bounds(value, start, end):
+    session_date = value.date()
+    if start > end and value.time() <= end:
+        session_date -= timedelta(days=1)
+    session_start = datetime.combine(session_date, start)
+    end_date = session_date + timedelta(days=1) if start > end else session_date
+    return session_start, datetime.combine(end_date, end)
+
+
 class SessionFiller(with_metaclass(metabase.MetaParams, object)):
     '''
     Bar Filler for a Data Source inside the declared session start/end times.
@@ -76,6 +91,7 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
         self._tdunit = self._tdeltas[data._timeframe] * data._compression
 
         self.seenbar = False  # control if at least one bar has been seen
+        self.sessstart = self.MAXDATE
         self.sessend = self.MAXDATE  # maxdate is the control for session bar
 
     def __call__(self, data):
@@ -101,42 +117,35 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
 
           - Else ... the incoming bar is in the session, fill up to it
         '''
-        # Get time of current (from data source) bar
         ret = False
-
         dtime_cur = data.datetime.datetime()
 
         if dtime_cur > self.sessend:
-            # bar over session end - fill up and invalidate
-            # Do not put current bar in stack to let it be evaluated below
-            # Fill up to endsession + smallest unit of timeframe
-            ret = self._fillbars(data, self.dtime_prev,
-                                 self.sessend + self._tdframe,
-                                 tostack=False)
-            self.sessend = self.MAXDATE
+            if self.seenbar and self.dtime_prev <= self.sessend:
+                ret = self._fillbars(
+                    data, self.dtime_prev, self.sessend + self._tdframe,
+                    tostack=False)
+            self.sessstart = self.sessend = self.MAXDATE
 
-        # Fall through from previous check ... the bar which is over the
-        # session could already be in a new session and within the limits
-        if self.sessend == self.MAXDATE:
-            # No bar seen yet or one went over previous session limit
-            ddate = dtime_cur.date()
-            sessstart = datetime.combine(ddate, data.p.sessionstart)
-            self.sessend = sessend = datetime.combine(ddate, data.p.sessionend)
+        new_session = self.sessend == self.MAXDATE
+        if new_session:
+            self.sessstart, self.sessend = _session_bounds(
+                dtime_cur, data.p.sessionstart, data.p.sessionend)
 
-            if sessstart <= dtime_cur <= sessend:
-                # 1st bar from session in the session - fill from session start
-                if self.seenbar or not self.p.skip_first_fill:
-                    ret = self._fillbars(data,
-                                         sessstart - self._tdunit, dtime_cur)
+        if not self.sessstart <= dtime_cur <= self.sessend:
+            if new_session:
+                self.sessstart = self.sessend = self.MAXDATE
+            return ret
 
-            self.seenbar = True
-            self.dtime_prev = dtime_cur
-
+        if new_session:
+            if self.seenbar or not self.p.skip_first_fill:
+                ret = self._fillbars(
+                    data, self.sessstart - self._tdunit, dtime_cur)
         else:
-            # Seen a previous bar and this is in the session - fill up to it
             ret = self._fillbars(data, self.dtime_prev, dtime_cur)
-            self.dtime_prev = dtime_cur
 
+        self.seenbar = True
+        self.dtime_prev = dtime_cur
         return ret
 
     def _fillbars(self, data, time_start, time_end, tostack=True):
@@ -208,9 +217,9 @@ class SessionFilterSimple(with_metaclass(metabase.MetaParams, object)):
           - False: nothing to filter
           - True: filter current bar (because it's not in the session times)
         '''
-        # Both ends of the comparison are in the session
-        return not (
-            data.p.sessionstart <= data.datetime.time(0) <= data.p.sessionend)
+        return not _is_session_time(
+            data.datetime.time(0), data.p.sessionstart, data.p.sessionend
+        )
 
 
 class SessionFilter(with_metaclass(metabase.MetaParams, object)):
@@ -235,8 +244,8 @@ class SessionFilter(with_metaclass(metabase.MetaParams, object)):
           - True: data stream was manipulated (bar outside of session times and
           - removed)
         '''
-        if data.p.sessionstart <= data.datetime.time(0) <= data.p.sessionend:
-            # Both ends of the comparison are in the session
+        if _is_session_time(
+                data.datetime.time(0), data.p.sessionstart, data.p.sessionend):
             return False  # say the stream is untouched
 
         # bar outside of the regular session times

@@ -213,11 +213,15 @@ class Timer(with_metaclass(MetaParams, object)):
                     break
 
                 if dwhen > d:  # gone over current datetime
-                    self._dtwhen = dtwhen = date2num(dwhen)  # float timestamp
+                    if self._isdata:
+                        self._dtwhen = dtwhen = self._tzdata.date2num(dwhen)
+                    else:
+                        self._dtwhen = dtwhen = date2num(
+                            dwhen, tz=self._tzdata)
                     # Get the localized expected next time
                     if self._isdata:
                         self._dwhen = self._tzdata.num2date(dtwhen)
-                    else:  # assume pytz compatible or None
+                    else:  # assume tzinfo-compatible or None
                         self._dwhen = num2date(dtwhen, tz=self._tzdata)
 
                     break

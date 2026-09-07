@@ -226,10 +226,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
           - ``None``: in this case the datetime displayed by strategies will be
             in UTC, which has been always the standard behavior
 
-          - ``pytz`` instance. It will be used as such to convert UTC times to
-            the chosen timezone
+          - ``tzinfo`` instance. It converts UTC times to the chosen timezone.
 
-          - ``string``. Instantiating a ``pytz`` instance will be attempted.
+          - ``string``. It is resolved with ``zoneinfo.ZoneInfo``.
 
           - ``integer``. Use, for the strategy, the same timezone as the
             corresponding ``data`` in the ``self.datas`` iterable (``0`` would
@@ -496,14 +495,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
             `datetime.date`` instance and returns ``True`` if the date is
             allowed for timers or else returns ``False``
 
-          - ``tzdata`` which can be either ``None`` (default), a ``pytz``
-            instance or a ``data feed`` instance.
+          - ``tzdata`` which can be either ``None`` (default), a ``tzinfo``
+            instance, timezone name, or a ``data feed`` instance.
 
             ``None``: ``when`` is interpreted at face value (which translates
             to handling it as if it where UTC even if it's not)
 
-            ``pytz`` instance: ``when`` will be interpreted as being specified
-            in the local time specified by the timezone instance.
+            ``tzinfo`` instance or name: ``when`` will be interpreted in the
+            local time specified by that timezone.
 
             ``data feed`` instance: ``when`` will be interpreted as being
             specified in the local time specified by the ``tz`` parameter of
@@ -547,10 +546,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
           - ``None``: in this case the datetime displayed by strategies will be
             in UTC, which has been always the standard behavior
 
-          - ``pytz`` instance. It will be used as such to convert UTC times to
-            the chosen timezone
+          - ``tzinfo`` instance. It converts UTC times to the chosen timezone.
 
-          - ``string``. Instantiating a ``pytz`` instance will be attempted.
+          - ``string``. It is resolved with ``zoneinfo.ZoneInfo``.
 
           - ``integer``. Use, for the strategy, the same timezone as the
             corresponding ``data`` in the ``self.datas`` iterable (``0`` would

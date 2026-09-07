@@ -673,14 +673,14 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             `datetime.date`` instance and returns ``True`` if the date is
             allowed for timers or else returns ``False``
 
-          - ``tzdata`` which can be either ``None`` (default), a ``pytz``
-            instance or a ``data feed`` instance.
+          - ``tzdata`` which can be either ``None`` (default), a ``tzinfo``
+            instance, timezone name, or a ``data feed`` instance.
 
             ``None``: ``when`` is interpreted at face value (which translates
             to handling it as if it where UTC even if it's not)
 
-            ``pytz`` instance: ``when`` will be interpreted as being specified
-            in the local time specified by the timezone instance.
+            ``tzinfo`` instance or name: ``when`` will be interpreted in the
+            local time specified by that timezone.
 
             ``data feed`` instance: ``when`` will be interpreted as being
             specified in the local time specified by the ``tz`` parameter of

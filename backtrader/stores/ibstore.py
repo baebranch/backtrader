@@ -36,7 +36,7 @@ import ib.opt as ibopt
 from backtrader import TimeFrame, Position
 from backtrader.metabase import MetaParams
 from backtrader.utils.py3 import bytes, bstr, queue, with_metaclass, long
-from backtrader.utils import AutoDict, UTC
+from backtrader.utils import AutoDict, UTC, utc_naive
 
 bytes = bstr  # py2/3 need for ibpy
 
@@ -959,8 +959,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
                 dteos = datetime.combine(dt, sessionend)
                 tz = self.histtz[tickerId]
                 if tz:
-                    dteostz = tz.localize(dteos)
-                    dteosutc = dteostz.astimezone(UTC).replace(tzinfo=None)
+                    dteosutc = utc_naive(dteos, tz)
                     # When requesting for example daily bars, the current day
                     # will be returned with the already happened data. If the
                     # session end were added, the new ticks wouldn't make it

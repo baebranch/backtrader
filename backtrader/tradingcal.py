@@ -26,7 +26,7 @@ from datetime import datetime, timedelta, time
 
 from .metabase import MetaParams
 from backtrader.utils.py3 import string_types, with_metaclass
-from backtrader.utils import UTC
+from backtrader.utils import UTC, utc_naive
 
 __all__ = ['TradingCalendarBase', 'TradingCalendar', 'PandasMarketCalendar']
 
@@ -170,26 +170,41 @@ class TradingCalendar(TradingCalendarBase):
         The return value is a tuple with 2 components: opentime, closetime
         '''
         while True:
-            dt = day.date()
+            local_day = day
+            if tz is not None:
+                if day.tzinfo is None:
+                    local_day = day.replace(tzinfo=UTC).astimezone(tz)
+                else:
+                    local_day = day.astimezone(tz)
+                local_day = local_day.replace(tzinfo=None)
+            dt = local_day.date()
             try:
                 i = self._earlydays.index(dt)
                 o, c = self.p.earlydays[i][1:]
             except ValueError:  # not found
                 o, c = self.p.open, self.p.close
 
-            closing = datetime.combine(dt, c)
-            if tz is not None:
-                closing = tz.localize(closing).astimezone(UTC)
-                closing = closing.replace(tzinfo=None)
-
-            if day > closing:  # current time over eos
-                day += ONEDAY
-                continue
+            if c <= o and local_day.time() <= c:
+                dt -= ONEDAY
+                try:
+                    i = self._earlydays.index(dt)
+                    o, c = self.p.earlydays[i][1:]
+                except ValueError:
+                    o, c = self.p.open, self.p.close
 
             opening = datetime.combine(dt, o)
+            closing_date = dt + ONEDAY if c <= o else dt
+            closing = datetime.combine(closing_date, c)
             if tz is not None:
-                opening = tz.localize(opening).astimezone(UTC)
-                opening = opening.replace(tzinfo=None)
+                opening = utc_naive(opening, tz)
+                closing = utc_naive(closing, tz)
+
+            comparison_day = day
+            if day.tzinfo is not None:
+                comparison_day = day.astimezone(UTC).replace(tzinfo=None)
+            if comparison_day > closing:  # current time over eos
+                day += ONEDAY
+                continue
 
             return opening, closing
 

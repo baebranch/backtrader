@@ -174,7 +174,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         self.lines.datetime._settz(self._tz)
 
         # This should probably be also called from an override-able method
-        self._tzinput = bt.utils.date.Localizer(self._gettzinput())
+        self._tzinput = tzparse(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
         if self.p.fromdate is None:
@@ -244,10 +244,6 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         return tzparse(self.p.tz)
 
     def date2num(self, dt):
-        if self._tz is not None:
-            return date2num(dt)
-            # return date2num(self._tz.localize(dt))
-
         return date2num(dt)
 
     def num2date(self, dt=None, tz=None, naive=True):
@@ -498,9 +494,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                 # Input has been converted at face value but it's not UTC in
                 # the input stream
                 dtime = num2date(dt)  # get it in a naive datetime
-                # localize it
-                dtime = self._tzinput.localize(dtime)  # pytz compatible-ized
-                self.lines.datetime[0] = dt = date2num(dtime)  # keep UTC val
+                self.lines.datetime[0] = dt = date2num(
+                    dtime, tz=self._tzinput)  # keep UTC value
 
             # Check standard date from/to filters
             if dt < self.fromdate:

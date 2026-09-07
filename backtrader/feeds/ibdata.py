@@ -26,8 +26,7 @@ import datetime
 import backtrader as bt
 from backtrader.feed import DataBase
 from backtrader import TimeFrame, date2num, num2date
-from backtrader.utils.py3 import (integer_types, queue, string_types,
-                                  with_metaclass)
+from backtrader.utils.py3 import (integer_types, queue, with_metaclass)
 from backtrader.metabase import MetaParams
 from backtrader.stores import ibstore
 
@@ -220,37 +219,14 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return self.ib.timeoffset()
 
     def _gettz(self):
-        # If no object has been provided by the user and a timezone can be
-        # found via contractdtails, then try to get it from pytz, which may or
-        # may not be available.
-
-        # The timezone specifications returned by TWS seem to be abbreviations
-        # understood by pytz, but the full list which TWS may return is not
-        # documented and one of the abbreviations may fail
-        tzstr = isinstance(self.p.tz, string_types)
-        if self.p.tz is not None and not tzstr:
-            return bt.utils.date.Localizer(self.p.tz)
-
+        if self.p.tz is not None:
+            return bt.utils.date.tzparse(self.p.tz)
         if self.contractdetails is None:
-            return None  # nothing can be done
-
+            return None
         try:
-            import pytz  # keep the import very local
-        except ImportError:
-            return None  # nothing can be done
-
-        tzs = self.p.tz if tzstr else self.contractdetails.m_timeZoneId
-
-        if tzs == 'CST':  # reported by TWS, not compatible with pytz. patch it
-            tzs = 'CST6CDT'
-
-        try:
-            tz = pytz.timezone(tzs)
-        except pytz.UnknownTimeZoneError:
-            return None  # nothing can be done
-
-        # contractdetails there, import ok, timezone found, return it
-        return tz
+            return bt.utils.date.tzparse(self.contractdetails.m_timeZoneId)
+        except ValueError:
+            return None
 
     def islive(self):
         '''Returns ``True`` to notify ``Cerebro`` that preloading and runonce

@@ -22,14 +22,13 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 
 import backtrader as bt
 from backtrader import TimeFrame, date2num, num2date
 from backtrader.feed import DataBase
 from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import (integer_types, queue, string_types,
-                                  with_metaclass)
+from backtrader.utils.py3 import (integer_types, queue, with_metaclass)
 
 from backtrader.stores import vcstore
 
@@ -87,8 +86,8 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         Some markets are special (``096``) and need special internal coverage
         and timezone support to display in the user expected market time.
 
-        If this parameter is set to ``True`` importing ``pytz`` will be
-        attempted to use timezones (default)
+        If this parameter is set to ``True``, ``zoneinfo`` timezones will be
+        used (default)
 
         Disabling it will remove timezone usage (may help if the load is
         excesive)
@@ -98,7 +97,7 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         ('historical', False),  # usual industry value
         ('millisecond', True),  # fix missing millisecond in time
         ('tradename', None),  # name of the real asset to trade on
-        ('usetimezones', True),  # use pytz timezones if found
+        ('usetimezones', True),  # use zoneinfo timezones
     )
 
     # Holds the calculated offset to the timestamps of the VC Server
@@ -178,65 +177,26 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         return self._gettz(tzin=True)
 
     def _gettz(self, tzin=False):
-        '''Returns the default output timezone for the data
-
-        This defaults to be the timezone in which the market is traded
-        '''
-        # If no object has been provided by the user and a timezone can be
-        # found via contractdtails, then try to get it from pytz, which may or
-        # may not be available.
-
-        # The timezone specifications returned by TWS seem to be abbreviations
-        # understood by pytz, but the full list which TWS may return is not
-        # documented and one of the abbreviations may fail
-        ptz = self.p.tz
-        tzstr = isinstance(ptz, string_types)
-        if ptz is not None and not tzstr:
-            return bt.utils.date.Localizer(ptz)
-
-        if self._state == self._ST_NOTFOUND:
-            return None  # nothing else can be done
-
-        if not self.p.usetimezones:
+        '''Returns the default output timezone for the data.'''
+        if self.p.tz is not None:
+            return bt.utils.date.tzparse(self.p.tz)
+        if self._state == self._ST_NOTFOUND or not self.p.usetimezones:
             return None
 
+        tzs = None
+        if not tzin and self.p.dataname in self._TZOUT:
+            tzs = self._TZOUT[self.p.dataname]
+        if tzs is None:
+            for mktz, mktcodes in self._TZS.items():
+                if self._mktcode in mktcodes:
+                    tzs = mktz
+                    break
+        if tzs is None:
+            return None
         try:
-            import pytz  # keep the import very local
-        except ImportError:
-            return None  # nothing can be done
-
-        # dataname 010ABCXXXXX -> ABC (3, 4 and 5) is market code
-        if tzstr:
-            tzs = ptz
-        else:
-            tzs = None
-
-            if not tzin:
-                if self.p.dataname in self._TZOUT:
-                    tzs = self._TZOUT[self.p.dataname]
-
-            if tzs is None:
-                for mktz, mktcodes in self._TZS.items():
-                    if self._mktcode in mktcodes:
-                        tzs = mktz
-                        break
-
-            if tzs is None:
-                return None
-
-            if isinstance(tzs, tzinfo):
-                return bt.utils.date.Localizer(tzs)
-
-        if tzs:
-            try:
-                tz = pytz.timezone(tzs)
-            except pytz.UnknownTimeZoneError:
-                return None  # nothing can be done
-        else:
+            return bt.utils.date.tzparse(tzs)
+        except ValueError:
             return None
-
-        # contractdetails there, import ok, timezone found, return it
-        return tz
 
     def islive(self):
         '''Returns ``True`` to notify ``Cerebro`` that preloading and runonce
