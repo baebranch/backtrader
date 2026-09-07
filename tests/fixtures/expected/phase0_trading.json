@@ -1,0 +1,34 @@
+{
+  "entryBar": 1,
+  "lifecycle": [
+    "start", "nextstart:2020-01-01", "next:2020-01-01",
+    "next:2020-01-02", "next:2020-01-03", "next:2020-01-04",
+    "next:2020-01-05", "next:2020-01-06", "next:2020-01-07",
+    "next:2020-01-08", "stop"
+  ],
+  "bars": [
+    {"date": "2020-01-01", "cash": 1000.0, "value": 1000.0, "position": 0.0},
+    {"date": "2020-01-02", "cash": 898.5, "value": 1000.5, "position": 1.0},
+    {"date": "2020-01-03", "cash": 898.5, "value": 1001.5, "position": 1.0},
+    {"date": "2020-01-04", "cash": 898.5, "value": 1002.5, "position": 1.0},
+    {"date": "2020-01-05", "cash": 1002.0, "value": 1002.0, "position": 0.0},
+    {"date": "2020-01-06", "cash": 1002.0, "value": 1002.0, "position": 0.0},
+    {"date": "2020-01-07", "cash": 1002.0, "value": 1002.0, "position": 0.0},
+    {"date": "2020-01-08", "cash": 1002.0, "value": 1002.0, "position": 0.0}
+  ],
+  "orders": [
+    {"id": 1, "side": "buy", "status": "Submitted", "date": "2020-01-01", "size": 1.0, "price": null, "commission": null},
+    {"id": 1, "side": "buy", "status": "Accepted", "date": "2020-01-01", "size": 1.0, "price": null, "commission": null},
+    {"id": 1, "side": "buy", "status": "Completed", "date": "2020-01-02", "size": 1.0, "price": 101.0, "commission": 0.5},
+    {"id": 2, "side": "sell", "status": "Submitted", "date": "2020-01-04", "size": -1.0, "price": null, "commission": null},
+    {"id": 2, "side": "sell", "status": "Accepted", "date": "2020-01-04", "size": -1.0, "price": null, "commission": null},
+    {"id": 2, "side": "sell", "status": "Completed", "date": "2020-01-05", "size": -1.0, "price": 104.0, "commission": 0.5}
+  ],
+  "trades": [
+    {"state": "opened", "date": "2020-01-02", "size": 1.0, "price": 101.0, "pnl": 0.0, "pnlcomm": -0.5},
+    {"state": "closed", "date": "2020-01-05", "size": 0.0, "price": 101.0, "pnl": 3.0, "pnlcomm": 2.0}
+  ],
+  "finalCash": 1002.0,
+  "finalValue": 1002.0,
+  "finalPosition": 0.0
+}
