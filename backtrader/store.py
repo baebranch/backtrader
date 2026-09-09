@@ -24,7 +24,7 @@ from __future__ import (absolute_import, division, print_function,
 import collections
 
 from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import with_metaclass
+
 
 
 class MetaSingleton(MetaParams):
@@ -41,7 +41,7 @@ class MetaSingleton(MetaParams):
         return cls._singleton
 
 
-class Store(with_metaclass(MetaSingleton, object)):
+class Store(object, metaclass=MetaSingleton):
     '''Base class for all Stores'''
 
     _started = False

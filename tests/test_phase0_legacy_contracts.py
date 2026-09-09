@@ -66,3 +66,39 @@ def test_ordinal_datetime_round_trip_contract(value):
   if value.tzinfo is not None:
     assert restored.tzinfo is not None
   assert abs((restored.replace(tzinfo=None) - value.replace(tzinfo=None)).total_seconds()) < 0.00002
+
+
+@pytest.mark.parametrize("size", [0, 1, 8])
+def test_unbounded_bulk_forward_preserves_pointer_length_and_values(size):
+  line = LineBuffer()
+  line.forward(value=2.5, size=size)
+
+  assert line.idx == size - 1
+  assert len(line) == size
+  assert line.buflen() == size
+  assert list(line.array) == [2.5] * size
+
+  line.home()
+  assert line.idx == -1
+  assert len(line) == 0
+  assert line.buflen() == size
+  line.advance(size=size)
+  assert line.idx == size - 1
+  assert len(line) == size
+  if size:
+    line.backwards(size=size)
+    assert line.idx == -1
+    assert len(line) == 0
+    assert line.buflen() == 0
+
+
+def test_bulk_forward_leaves_qbuffer_saturation_behavior_unchanged():
+  line = LineBuffer()
+  line._minperiod = 3
+  line.qbuffer()
+  line.forward(value=4.0, size=8)
+
+  assert line.idx == 7
+  assert len(line) == 8
+  assert line.buflen() == 3
+  assert list(line.array) == [4.0, 4.0, 4.0]

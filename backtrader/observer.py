@@ -23,7 +23,7 @@ from __future__ import (absolute_import, division, print_function,
 
 
 from .lineiterator import LineIterator, ObserverBase, StrategyBase
-from backtrader.utils.py3 import with_metaclass
+
 
 
 class MetaObserver(ObserverBase.__class__):
@@ -43,7 +43,7 @@ class MetaObserver(ObserverBase.__class__):
         return _obj, args, kwargs
 
 
-class Observer(with_metaclass(MetaObserver, ObserverBase)):
+class Observer(ObserverBase, metaclass=MetaObserver):
     _stclock = False
 
     _OwnerCls = StrategyBase

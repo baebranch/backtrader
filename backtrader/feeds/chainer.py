@@ -46,7 +46,7 @@ class MetaChainer(bt.DataBase.__class__):
         return _obj, args, kwargs
 
 
-class Chainer(bt.with_metaclass(MetaChainer, bt.DataBase)):
+class Chainer(bt.DataBase, metaclass=MetaChainer):
     '''Class that chains datas'''
 
     def islive(self):

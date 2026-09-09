@@ -28,11 +28,10 @@ import collections
 from collections.abc import Iterable
 
 import backtrader as bt
-from backtrader.utils.py3 import (map, with_metaclass, string_types,
-                                  integer_types)
+from backtrader.utils.py3 import (map, string_types, integer_types)
 
 
-class WriterBase(with_metaclass(bt.MetaParams, object)):
+class WriterBase(object, metaclass=bt.MetaParams):
     pass
 
 

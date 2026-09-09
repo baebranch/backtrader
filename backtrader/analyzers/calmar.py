@@ -21,6 +21,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import collections
+import math
+
 import backtrader as bt
 from . import TimeDrawDown
 
@@ -71,8 +74,6 @@ class Calmar(bt.TimeFrameAnalyzerBase):
     Attributes:
       - ``calmar`` the latest calculated calmar ratio
     '''
-
-    packages = ('collections', 'math',)
 
     params = (
         ('timeframe', bt.TimeFrame.Months),  # default in calmar

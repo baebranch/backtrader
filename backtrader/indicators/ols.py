@@ -29,6 +29,34 @@ __all__ = ['OLS_Slope_InterceptN', 'OLS_TransformationN', 'OLS_BetaN',
            'CointN']
 
 
+def _pandas():
+    try:
+        import pandas
+    except ImportError as exc:
+        raise ImportError('OLS indicators require the optional pandas package') from exc
+    return pandas
+
+
+def _statsmodels():
+    try:
+        import statsmodels.api
+    except ImportError as exc:
+        raise ImportError(
+            'OLS indicators require the optional statsmodels package'
+        ) from exc
+    return statsmodels.api
+
+
+def _coint():
+    try:
+        from statsmodels.tsa.stattools import coint
+    except ImportError as exc:
+        raise ImportError(
+            'CointN requires the optional statsmodels package'
+        ) from exc
+    return coint
+
+
 class OLS_Slope_InterceptN(PeriodN):
     '''
     Calculates a linear regression using ``statsmodel.OLS`` (Ordinary least
@@ -38,20 +66,18 @@ class OLS_Slope_InterceptN(PeriodN):
     '''
     _mindatas = 2  # ensure at least 2 data feeds are passed
 
-    packages = (
-        ('pandas', 'pd'),
-        ('statsmodels.api', 'sm'),
-    )
     lines = ('slope', 'intercept',)
     params = (
         ('period', 10),
     )
 
     def next(self):
-        p0 = pd.Series(self.data0.get(size=self.p.period))
-        p1 = pd.Series(self.data1.get(size=self.p.period))
-        p1 = sm.add_constant(p1)
-        intercept, slope = sm.OLS(p0, p1).fit().params
+        pandas = _pandas()
+        statsmodels = _statsmodels()
+        p0 = pandas.Series(self.data0.get(size=self.p.period))
+        p1 = pandas.Series(self.data1.get(size=self.p.period))
+        p1 = statsmodels.add_constant(p1)
+        intercept, slope = statsmodels.OLS(p0, p1).fit().params
 
         self.lines.slope[0] = slope
         self.lines.intercept[0] = intercept
@@ -86,16 +112,13 @@ class OLS_BetaN(PeriodN):
     '''
     _mindatas = 2  # ensure at least 2 data feeds are passed
 
-    packages = (
-        ('pandas', 'pd'),
-    )
-
     lines = ('beta',)
     params = (('period', 10),)
 
     def next(self):
-        y, x = (pd.Series(d.get(size=self.p.period)) for d in self.datas)
-        r_beta = pd.ols(y=y, x=x, window_type='full_sample')
+        pandas = _pandas()
+        y, x = (pandas.Series(d.get(size=self.p.period)) for d in self.datas)
+        r_beta = pandas.ols(y=y, x=x, window_type='full_sample')
         self.lines.beta[0] = r_beta.beta['x']
 
 
@@ -108,13 +131,6 @@ class CointN(PeriodN):
     '''
     _mindatas = 2  # ensure at least 2 data feeds are passed
 
-    packages = (
-        ('pandas', 'pd'),  # import pandas as pd
-    )
-    frompackages = (
-        ('statsmodels.tsa.stattools', 'coint'),  # from st... import coint
-    )
-
     lines = ('score', 'pvalue',)
     params = (
         ('period', 10),
@@ -122,7 +138,9 @@ class CointN(PeriodN):
     )
 
     def next(self):
-        x, y = (pd.Series(d.get(size=self.p.period)) for d in self.datas)
+        pandas = _pandas()
+        coint = _coint()
+        x, y = (pandas.Series(d.get(size=self.p.period)) for d in self.datas)
         score, pvalue, _ = coint(x, y, trend=self.p.trend)
         self.lines.score[0] = score
         self.lines.pvalue[0] = pvalue

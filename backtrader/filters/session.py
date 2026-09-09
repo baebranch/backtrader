@@ -24,7 +24,7 @@ from __future__ import (absolute_import, division, print_function,
 from datetime import datetime, timedelta
 
 from backtrader import TimeFrame
-from backtrader.utils.py3 import with_metaclass
+
 from .. import metabase
 
 
@@ -43,7 +43,7 @@ def _session_bounds(value, start, end):
     return session_start, datetime.combine(end_date, end)
 
 
-class SessionFiller(with_metaclass(metabase.MetaParams, object)):
+class SessionFiller(object, metaclass=metabase.MetaParams):
     '''
     Bar Filler for a Data Source inside the declared session start/end times.
 
@@ -193,7 +193,7 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
         return True
 
 
-class SessionFilterSimple(with_metaclass(metabase.MetaParams, object)):
+class SessionFilterSimple(object, metaclass=metabase.MetaParams):
     '''
     This class can be applied to a data source as a filter and will filter out
     intraday bars which fall outside of the regular session times (ie: pre/post
@@ -222,7 +222,7 @@ class SessionFilterSimple(with_metaclass(metabase.MetaParams, object)):
         )
 
 
-class SessionFilter(with_metaclass(metabase.MetaParams, object)):
+class SessionFilter(object, metaclass=metabase.MetaParams):
     '''
     This class can be applied to a data source as a filter and will filter out
     intraday bars which fall outside of the regular session times (ie: pre/post

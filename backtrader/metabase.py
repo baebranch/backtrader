@@ -27,7 +27,7 @@ import itertools
 from collections import OrderedDict
 
 import backtrader as bt
-from .utils.py3 import zip, string_types, with_metaclass
+from .utils.py3 import zip, string_types
 
 
 def findbases(kls, topclass):
@@ -296,7 +296,7 @@ class MetaParams(MetaBase):
         return _obj, args, kwargs
 
 
-class ParamsBase(with_metaclass(MetaParams, object)):
+class ParamsBase(object, metaclass=MetaParams):
     pass  # stub to allow easy subclassing without metaclasses
 
 

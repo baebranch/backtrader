@@ -31,7 +31,7 @@ import backtrader as bt
 from backtrader import (date2num, num2date, time2num, TimeFrame, dataseries,
                         metabase)
 
-from backtrader.utils.py3 import with_metaclass, zip, range, string_types
+from backtrader.utils.py3 import zip, range, string_types
 from backtrader.utils import tzparse
 from .dataseries import SimpleFilterWrapper
 from .resamplerfilter import Resampler, Replayer
@@ -119,8 +119,8 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         return _obj, args, kwargs
 
 
-class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
-                                      dataseries.OHLCDateTime)):
+class AbstractDataBase(dataseries.OHLCDateTime,
+                       metaclass=MetaAbstractDataBase):
 
     params = (
         ('dataname', None),
@@ -595,7 +595,7 @@ class DataBase(AbstractDataBase):
     pass
 
 
-class FeedBase(with_metaclass(metabase.MetaParams, object)):
+class FeedBase(object, metaclass=metabase.MetaParams):
     params = () + DataBase.params._gettuple()
 
     def __init__(self):
@@ -641,7 +641,7 @@ class MetaCSVDataBase(DataBase.__class__):
         return _obj, args, kwargs
 
 
-class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
+class CSVDataBase(DataBase, metaclass=MetaCSVDataBase):
     '''
     Base class for classes implementing CSV DataFeeds
 

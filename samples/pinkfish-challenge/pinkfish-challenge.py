@@ -28,7 +28,7 @@ import backtrader as bt
 import backtrader.indicators as btind
 
 
-class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
+class DayStepsCloseFilter(object, metaclass=bt.MetaParams):
     '''
     Replays a bar in 2 steps:
 
@@ -92,7 +92,7 @@ class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
         return False  # nothing delivered here
 
 
-class DayStepsReplayFilter(bt.with_metaclass(bt.MetaParams, object)):
+class DayStepsReplayFilter(object, metaclass=bt.MetaParams):
     '''
     Replays a bar in 2 steps:
 

@@ -26,7 +26,7 @@ from copy import copy
 import datetime
 import itertools
 
-from .utils.py3 import range, with_metaclass, iteritems
+from .utils.py3 import range, iteritems
 
 from .metabase import MetaParams
 from .utils import AutoOrderedDict
@@ -219,7 +219,7 @@ class OrderData(object):
         return obj
 
 
-class OrderBase(with_metaclass(MetaParams, object)):
+class OrderBase(object, metaclass=MetaParams):
     params = (
         ('owner', None), ('data', None),
         ('size', None), ('price', None), ('pricelimit', None),

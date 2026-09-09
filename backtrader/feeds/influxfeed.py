@@ -38,12 +38,18 @@ TIMEFRAMES = dict(
 )
 
 
-class InfluxDB(feed.DataBase):
-    frompackages = (
-        ('influxdb', [('InfluxDBClient', 'idbclient')]),
-        ('influxdb.exceptions', 'InfluxDBClientError')
-    )
+def _influx_dependencies():
+    try:
+        from influxdb import InfluxDBClient
+        from influxdb.exceptions import InfluxDBClientError
+    except ImportError as exc:
+        raise ImportError(
+            'InfluxDB feed requires the optional influxdb package'
+        ) from exc
+    return InfluxDBClient, InfluxDBClientError
 
+
+class InfluxDB(feed.DataBase):
     params = (
         ('host', '127.0.0.1'),
         ('port', '8086'),
@@ -62,9 +68,11 @@ class InfluxDB(feed.DataBase):
 
     def start(self):
         super(InfluxDB, self).start()
+        InfluxDBClient, InfluxDBClientError = _influx_dependencies()
         try:
-            self.ndb = idbclient(self.p.host, self.p.port, self.p.username,
-                                 self.p.password, self.p.database)
+            self.ndb = InfluxDBClient(
+                self.p.host, self.p.port, self.p.username,
+                self.p.password, self.p.database)
         except InfluxDBClientError as err:
             print('Failed to establish connection to InfluxDB: %s' % err)
 

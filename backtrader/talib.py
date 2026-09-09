@@ -27,7 +27,7 @@ from __future__ import (absolute_import, division, print_function,
 import sys
 
 import backtrader as bt
-from backtrader.utils.py3 import with_metaclass
+
 
 
 try:
@@ -89,7 +89,7 @@ else:
             _obj._tafunc = getattr(talib, tafuncinfo['name'], None)
             return _obj, args, kwargs  # return the object and args
 
-    class _TALibIndicator(with_metaclass(_MetaTALibIndicator, bt.Indicator)):
+    class _TALibIndicator(bt.Indicator, metaclass=_MetaTALibIndicator):
         CANDLEOVER = 1.02  # 2% over
         CANDLEREF = 1  # Open, High, Low, Close (0, 1, 2, 3)
 

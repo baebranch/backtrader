@@ -26,7 +26,7 @@ import operator
 import collections
 from collections.abc import Iterable
 
-from .utils.py3 import map, range, zip, with_metaclass, string_types
+from .utils.py3 import map, range, zip, string_types
 from .utils import DotDict
 
 from .lineroot import LineRoot, LineSingle
@@ -146,7 +146,7 @@ class MetaLineIterator(LineSeries.__class__):
         return _obj, args, kwargs
 
 
-class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
+class LineIterator(LineSeries, metaclass=MetaLineIterator):
     _nextforce = False  # force cerebro to run in next mode (runonce=False)
 
     _mindatas = 1

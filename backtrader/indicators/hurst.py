@@ -27,6 +27,16 @@ from . import PeriodN
 __all__ = ['HurstExponent', 'Hurst']
 
 
+def _numpy():
+    try:
+        import numpy
+    except ImportError as exc:
+        raise ImportError(
+            'HurstExponent requires the optional numpy package'
+        ) from exc
+    return numpy
+
+
 class HurstExponent(PeriodN):
     '''
     References:
@@ -56,10 +66,6 @@ class HurstExponent(PeriodN):
     compatibility
 
     '''
-    frompackages = (
-        ('numpy', ('asarray', 'log10', 'polyfit', 'sqrt', 'std', 'subtract')),
-    )
-
     alias = ('Hurst',)
     lines = ('hurst',)
     params = (
@@ -76,21 +82,24 @@ class HurstExponent(PeriodN):
 
     def __init__(self):
         super(HurstExponent, self).__init__()
+        numpy = _numpy()
         # Prepare the lags array
         self._lag_start = lag_start = self.p.lag_start or 2
         self._lag_end = lag_end = self.p.lag_end or (self.p.period // 2)
-        self.lags = asarray(range(lag_start, lag_end))
-        self.log10lags = log10(self.lags)
+        self.lags = numpy.asarray(range(lag_start, lag_end))
+        self.log10lags = numpy.log10(self.lags)
 
     def next(self):
+        numpy = _numpy()
         # Fetch the data
-        ts = asarray(self.data.get(size=self.p.period))
+        ts = numpy.asarray(self.data.get(size=self.p.period))
 
         # Calculate the array of the variances of the lagged differences
-        tau = [sqrt(std(subtract(ts[lag:], ts[:-lag]))) for lag in self.lags]
+        tau = [numpy.sqrt(numpy.std(numpy.subtract(ts[lag:], ts[:-lag])))
+               for lag in self.lags]
 
         # Use a linear fit to estimate the Hurst Exponent
-        poly = polyfit(self.log10lags, log10(tau), 1)
+        poly = numpy.polyfit(self.log10lags, numpy.log10(tau), 1)
 
         # Return the Hurst exponent from the polyfit output
         self.lines.hurst[0] = poly[0] * 2.0

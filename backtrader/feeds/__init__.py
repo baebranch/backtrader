@@ -30,7 +30,6 @@ from .yahoo import *
 from .quandl import *
 from .sierrachart import *
 from .mt4csv import *
-from .pandafeed import *
 from .influxfeed import *
 # try:
 #     from .ibdata import *

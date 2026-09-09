@@ -34,10 +34,10 @@ from __future__ import (absolute_import, division, print_function,
 import array
 import collections
 import datetime
-from itertools import islice
+from itertools import islice, repeat
 import math
 
-from .utils.py3 import range, with_metaclass, string_types
+from .utils.py3 import range, string_types
 
 from .lineroot import LineRoot, LineSingle, LineMultiple
 from . import metabase
@@ -254,8 +254,11 @@ class LineBuffer(LineSingle):
         self.idx += size
         self.lencount += size
 
-        for i in range(size):
-            self.array.append(value)
+        if self.mode == self.UnBounded and size > 1:
+            self.array.extend(repeat(value, size))
+        else:
+            for i in range(size):
+                self.array.append(value)
 
     def backwards(self, size=1, force=False):
         ''' Moves the logical index backwards and reduces the buffer as much as needed
@@ -580,7 +583,7 @@ class PseudoArray(object):
         return self
 
 
-class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
+class LineActions(LineBuffer, metaclass=MetaLineActions):
     '''
     Base class derived from LineBuffer intented to defined the
     minimum interface to make it compatible with a LineIterator by

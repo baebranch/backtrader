@@ -28,8 +28,6 @@ import random
 import backtrader as bt
 import backtrader.feeds as btfeeds
 
-from backtrader.utils.py3 import with_metaclass
-
 
 class St(bt.Strategy):
     def __init__(self):
@@ -61,7 +59,7 @@ class St(bt.Strategy):
                 self.order = self.buy(exectype=bt.Order.Close)
 
 
-class SessionEndFiller(with_metaclass(bt.metabase.MetaParams, object)):
+class SessionEndFiller(object, metaclass=bt.metabase.MetaParams):
     '''This data filter simply adds the time given in param ``endtime`` to the
     current data datetime
 
